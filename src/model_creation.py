@@ -123,10 +123,10 @@ def test_params(resample_time, center, deviation, num_dev, xgb_params) -> None:
 
                     # Train the model
                     model = XGBRegressor(**xgb_params)
-                    model.fit(X_train_scaled, y_train, eval_set=[(X_val_scaled, y_val)], early_stopping_rounds=50, verbose=False)
+                    model.fit(X_train_scaled, y_train, eval_set=[(X_val_scaled, y_val)], early_stopping_rounds=10, verbose=False)
 
                     # Save the scaler and model into mflow
-                    mlflow.sklearn.log_model(scaler, 'scaler')
+                    mlflow.sklearn.log_model(scaler, 'scaler', pyfunc_predict_fn='transform')
                     mlflow.xgboost.log_model(model, 'model')
 
                     # Evaluate the model
@@ -202,6 +202,7 @@ def test_params(resample_time, center, deviation, num_dev, xgb_params) -> None:
                     for date in failure_dates:
                         plt.axvline(x=date, color='red', linestyle='--')
                     plt.savefig(f'../reports/check.png')
+                    plt.clf()
                     mlflow.log_artifact(f'../reports/check.png')
 
                     costs = load_costs()
@@ -236,6 +237,9 @@ def test_params(resample_time, center, deviation, num_dev, xgb_params) -> None:
                         'FP_cost': FP_cost,
                         'FN_cost': FN_cost
                     })
+                    print(f'Model: {MODULE_NAME}_trb{id}_{col}',
+                                 f'Params: {xgb_params}',  f'Resample time: {resample_time}', f'Deviation: {deviation}',
+                                 f'Total cost: {total_cost}')
 
 if __name__ == '__main__':
     for n_estimators in [200, 500, 1000]:
@@ -252,6 +256,7 @@ if __name__ == '__main__':
                                         'max_depth': max_depth,
                                         'min_child_weight': min_child_weight,
                                         'learning_rate': learning_rate,
+                                        'tree_method':'gpu_hist',
                                     }
                                     test_params(
                                         resample_time=resample_time,
