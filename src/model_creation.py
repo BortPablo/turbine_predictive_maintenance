@@ -180,7 +180,7 @@ def test_params(resample_time, center, deviation, num_dev, xgb_params) -> None:
                         0
                     )
                     failures = load_failures()
-                    failure_dates = failures[(failures['Turbine_ID'] == id) & (failures['Component'] == comp)].index
+                    failure_dates = failures[(failures['Turbine_ID'] == id) & (failures['Component'] == comp) & (failures.index > '2017-06-01')].index
 
                     init = True
                     for date in failure_dates:
