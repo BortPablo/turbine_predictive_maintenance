@@ -205,7 +205,8 @@ def test_params(resample_time, center, deviation, num_dev, xgb_params) -> None:
                 if total_cost > 0:
                     MODULE_NAME = os.getenv('MODULE_NAME')
                     # Start mlflow run
-                    with mlflow.start_run(run_name=f'{MODULE_NAME}_trb{id}_{col}') as run:
+                    experiment_id = mlflow.search_experiments(filter_string=f"name = '{os.environ['MLFLOW_EXPERIMENT_NAME']}'")[0].experiment_id
+                    with mlflow.start_run(run_name=f'{MODULE_NAME}_trb{id}_{col}', experiment_id=experiment_id) as run:
                         # Set tags
                         mlflow.set_tags({
                             'MODULE': MODULE_NAME,
@@ -250,26 +251,42 @@ def test_params(resample_time, center, deviation, num_dev, xgb_params) -> None:
                     print(f'Model: {MODULE_NAME}_trb{id}_{col}', f'Total cost: {total_cost}', 'Not saved!')
 
 if __name__ == '__main__':
-    for n_estimators in [50, 100, 200, 500, 1000]:
-        for max_depth in [3, 5, 7, 9]:
-            for min_child_weight in [1, 3, 5]:
-                for learning_rate in [0.01, 0.05, 0.1]:
-                    for resample_time in [24]:
-                        for center in ['median']:
-                            for deviation in ['std', 'mad']:
-                                for num_dev in [3]:                              
+    # for n_estimators in [50, 100, 200, 500, 1000]:
+    #     for max_depth in [3, 5, 7, 9]:
+    #         for min_child_weight in [1, 3, 5]:
+    #             for learning_rate in [0.01, 0.05, 0.1]:
+    #                 for resample_time in [24]:
+    #                     for center in ['median']:
+    #                         for deviation in ['std', 'mad']:
+    #                             for num_dev in [3]:                              
 
-                                    xgb_params = {
-                                        'n_estimators': n_estimators,
-                                        'max_depth': max_depth,
-                                        'min_child_weight': min_child_weight,
-                                        'learning_rate': learning_rate,
-                                        'tree_method':'gpu_hist',
-                                    }
-                                    test_params(
-                                        resample_time=resample_time,
-                                        center=center,
-                                        deviation=deviation,
-                                        num_dev=num_dev,
-                                        xgb_params=xgb_params
-                                    )
+    #                                 xgb_params = {
+    #                                     'n_estimators': n_estimators,
+    #                                     'max_depth': max_depth,
+    #                                     'min_child_weight': min_child_weight,
+    #                                     'learning_rate': learning_rate,
+    #                                     'tree_method':'gpu_hist',
+    #                                 }
+    #                                 test_params(
+    #                                     resample_time=resample_time,
+    #                                     center=center,
+    #                                     deviation=deviation,
+    #                                     num_dev=num_dev,
+    #                                     xgb_params=xgb_params
+    #                                 )
+    df = pd.read_parquet('../data/processed/best_xgb_models_parameters.parquet')
+    for col in df.columns:
+        aux = df[col]
+        xgb_params = {
+            'n_estimators': int(aux['params.n_estimators']),
+            'max_depth': int(aux['params.max_depth']),
+            'min_child_weight': int(aux['params.min_child_weight']),
+            'learning_rate': float(aux['params.learning_rate']),
+        }
+        test_params(
+            resample_time=str(aux['params.resample_time']),
+            center=aux['params.center'],
+            deviation=aux['params.deviation'],
+            num_dev=float(aux['params.num_dev']),
+            xgb_params=xgb_params
+        )
