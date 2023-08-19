@@ -94,6 +94,6 @@ Benefit = 15233.10€
 
 Currently the benefits of using MLflow are visible in `notebooks/3-results.ipynb` where benefits/costs are calculated for each model.
 
-New models are able to save 200.965€ per year in maintenance costs, while the best models in the thesis were able to save 61.000€ per year. The percentage of total benefit of all the models with respect to maximum possible benefit that models can achieve is 83.74 %.
+New models are able to save 200.965€ in test period, while the best models in the thesis were able to save 61.000€ in test period. The percentage of total benefit of all the models with respect to maximum possible benefit that models can achieve is 83.74 %.
 
 ![Total benefit](reports/total_benefit.png)
